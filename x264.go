@@ -1,8 +1,8 @@
 package x264
 
 /*
-#cgo CFLAGS: -I. -I${SRCDIR}/internal/x264/include
-#cgo LDFLAGS: -L${SRCDIR}/internal/x264/lib -lx264 -lpthread -lm -ldl
+#cgo CFLAGS: -I.
+#cgo pkg-config: x264
 
 #include "x264_wrapper.h"
 #include <stdlib.h>

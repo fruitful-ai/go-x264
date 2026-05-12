@@ -1,25 +1,27 @@
 # go-x264
 
-Go bindings for x264 — statically linked, zero-latency H.264 encoding.
-
-No system `libx264` required. `make` downloads a pre-built release asset (linux/amd64) or builds from source.
+Go bindings for x264 — dynamically linked, zero-latency H.264 encoding.
 
 ## Prerequisites
 
 - Go 1.26+
-
-### Source build (non-linux/amd64 or first run)
+- libx264 (shared library + headers)
 
 ```bash
-sudo apt install make gcc curl bzip2   # Debian / Ubuntu
-xcode-select --install                 # macOS
+# Debian / Ubuntu
+sudo apt install libx264-dev gcc
+
+# macOS
+brew install x264
+
+# Fedora
+sudo dnf install libx264-devel
 ```
 
 ## Installation
 
 ```bash
 go get fruitful.ch/x264
-make
 ```
 
 ## Quick Start
@@ -51,9 +53,8 @@ func main() {
 ## Commands
 
 ```bash
-make          # build x264 + Go package
-make test     # run tests
-make clean    # remove build artifacts
+go build ./...     # build
+go test -v ./...   # test
 ```
 
 ## License

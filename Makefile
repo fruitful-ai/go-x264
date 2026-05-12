@@ -3,11 +3,9 @@
 all: build
 
 build:
-	./build_x264.sh
 	go build ./...
 
 test:
-	./build_x264.sh
 	go test -v ./...
 
 clean:
