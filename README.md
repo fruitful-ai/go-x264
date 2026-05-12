@@ -21,7 +21,7 @@ sudo dnf install libx264-devel
 ## Installation
 
 ```bash
-go get fruitful.ch/x264
+go get github.com/fruitful-ai/go-x264
 ```
 
 ## Quick Start
@@ -31,7 +31,7 @@ package main
 
 import (
     "log"
-    "fruitful.ch/x264"
+    "github.com/fruitful-ai/go-x264"
 )
 
 func main() {
