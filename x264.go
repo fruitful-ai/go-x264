@@ -16,6 +16,7 @@ import (
 
 type Encoder struct {
 	enc    *C.X264Encoder
+	fps    int
 	width  int
 	height int
 }
@@ -34,6 +35,7 @@ func New(width, height, fps int) (*Encoder, error) {
 		enc:    enc,
 		width:  width,
 		height: height,
+		fps:    fps,
 	}
 	runtime.SetFinalizer(e, (*Encoder).Close)
 	return e, nil
@@ -72,4 +74,9 @@ func (e *Encoder) Close() {
 		C.x264_encoder_destroy(e.enc)
 		e.enc = nil
 	}
+}
+
+// GetFps return the number of frames per second the encododer expects
+func (e *Encoder) GetFps() int {
+	return e.fps
 }

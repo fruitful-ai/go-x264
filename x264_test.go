@@ -140,3 +140,13 @@ func TestEncodeDifferentSizes(t *testing.T) {
 		}
 	}
 }
+
+func TestGetFps(t *testing.T) {
+	enc, err := New(640, 640, 30)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fps := enc.GetFps(); fps != 30 {
+		t.Fatalf("Wanted %d got %d", 30, fps)
+	}
+}
