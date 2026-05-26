@@ -76,6 +76,16 @@ func (e *Encoder) Close() {
 	}
 }
 
+// ForceIDR tells the encoder to produce an IDR (keyframe) on the next EncodeYUV call.
+// This is safe to call from a different goroutine than EncodeYUV.
+func (e *Encoder) ForceIDR() {
+	if e.enc == nil {
+		return
+	}
+
+	C.x264_encoder_force_idr(e.enc)
+}
+
 // GetFps return the number of frames per second the encododer expects
 func (e *Encoder) GetFps() int {
 	return e.fps

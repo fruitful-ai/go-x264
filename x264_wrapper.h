@@ -11,6 +11,7 @@ typedef struct X264Encoder X264Encoder;
 
 X264Encoder* x264_encoder_create(int width, int height, int fps);
 int x264_encode_frame(X264Encoder* enc, uint8_t* yuv, uint8_t** out, int* out_size);
+void x264_encoder_force_idr(X264Encoder* enc);
 void x264_encoder_destroy(X264Encoder* enc);
 
 #ifdef __cplusplus
