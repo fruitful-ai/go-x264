@@ -141,6 +141,41 @@ func TestEncodeDifferentSizes(t *testing.T) {
 	}
 }
 
+func TestForceIDR(t *testing.T) {
+	enc, err := New(640, 480, 30)
+	if err != nil {
+		t.Fatalf("New() failed: %v", err)
+	}
+	defer enc.Close()
+
+	yuv := generateTestYUV(640, 480)
+
+	// Encode a few non-IDR frames to advance the encoder state
+	for i := range 5 {
+		data, err := enc.EncodeYUV(yuv)
+		if err != nil {
+			t.Fatalf("EncodeYUV frame %d failed: %v", i, err)
+		}
+		if len(data) == 0 {
+			t.Errorf("Frame %d: encoded data should not be empty", i)
+		}
+	}
+
+	enc.ForceIDR()
+
+	data, err := enc.EncodeYUV(yuv)
+	if err != nil {
+		t.Fatalf("EncodeYUV after ForceIDR failed: %v", err)
+	}
+	if len(data) == 0 {
+		t.Fatal("Encoded data after ForceIDR should not be empty")
+	}
+
+	if !HasNALType(data, NALTypeIDR) {
+		t.Errorf("ForceIDR frame should contain an IDR NAL (type 5). NAL types found: %v", NALTypes(data))
+	}
+}
+
 func TestGetFps(t *testing.T) {
 	enc, err := New(640, 640, 30)
 	if err != nil {

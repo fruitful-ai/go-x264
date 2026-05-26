@@ -2,6 +2,7 @@
 #include <x264.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdatomic.h>
 
 struct X264Encoder {
     x264_t* enc;
@@ -10,6 +11,7 @@ struct X264Encoder {
     int width;
     int height;
     int64_t pts;
+    atomic_int force_idr;
 };
 
 static void set_params(x264_param_t* param, int width, int height, int fps) {
@@ -86,6 +88,9 @@ int x264_encode_frame(X264Encoder* enc, uint8_t* yuv, uint8_t** out, int* out_si
 
     enc->pic.i_pts = enc->pts;
 
+    int need_idr = atomic_exchange(&enc->force_idr, 0);
+    enc->pic.i_type = need_idr ? X264_TYPE_IDR : X264_TYPE_AUTO;
+
     x264_nal_t* nals = NULL;
     int i_nals = 0;
 
@@ -133,6 +138,14 @@ int x264_encode_frame(X264Encoder* enc, uint8_t* yuv, uint8_t** out, int* out_si
     x264_encoder_delayed_frames(enc->enc);
 
     return 0;
+}
+
+void x264_encoder_force_idr(X264Encoder* enc) {
+    if (enc == NULL) {
+        return;
+    }
+
+    atomic_store(&enc->force_idr, 1);
 }
 
 void x264_encoder_destroy(X264Encoder* enc) {
