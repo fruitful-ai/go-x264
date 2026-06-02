@@ -1,13 +1,8 @@
-.PHONY: all build test clean
-
-all: build
-
-build:
-	go build ./...
+.PHONY: test tag
 
 test:
-	go test -v ./...
+	go test ./...
 
-clean:
-	rm -rf internal/x264
-	go clean -cache
+tag:
+	# Using: https://github.com/caarlos0/svu
+	git tag $$(svu next)
