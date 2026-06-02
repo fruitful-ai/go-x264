@@ -80,3 +80,64 @@ func ImageToYUV(img image.Image) []byte {
 
 	return yuv
 }
+
+func CropEvenI420(src []byte, srcWidth, srcHeight int, dst []byte) {
+	targetWidth := srcWidth &^ 1
+	targetHeight := srcHeight &^ 1
+
+	uvSrcSize := (srcWidth / 2) * (srcHeight / 2)
+
+	ySrc := src[:srcWidth*srcHeight]
+	uvSrc := src[srcWidth*srcHeight:]
+	uSrc := uvSrc[:uvSrcSize]
+	vSrc := uvSrc[uvSrcSize:]
+
+	yDstSize := targetWidth * targetHeight
+	uvDstSize := (targetWidth / 2) * (targetHeight / 2)
+
+	yDst := dst[:yDstSize]
+	uDst := dst[yDstSize : yDstSize+uvDstSize]
+	vDst := dst[yDstSize+uvDstSize:]
+
+	for _, copyOp := range []struct {
+		Source       []byte
+		Target       []byte
+		TargetWidth  int
+		TargetHeight int
+		SourceWidth  int
+		SourceHeight int
+	}{
+		{
+			Source:       ySrc,
+			Target:       yDst,
+			TargetWidth:  targetWidth,
+			TargetHeight: targetHeight,
+			SourceWidth:  srcWidth,
+			SourceHeight: srcHeight,
+		},
+		{
+			Source:       uSrc,
+			Target:       uDst,
+			TargetWidth:  targetWidth / 2,
+			TargetHeight: targetHeight / 2,
+			SourceWidth:  srcWidth / 2,
+			SourceHeight: srcHeight / 2,
+		},
+		{
+			Source:       vSrc,
+			Target:       vDst,
+			TargetWidth:  targetWidth / 2,
+			SourceWidth:  srcWidth / 2,
+			TargetHeight: targetHeight / 2,
+			SourceHeight: srcHeight / 2,
+		},
+	} {
+		for i := range copyOp.TargetHeight {
+			copy(
+				copyOp.Target[i*copyOp.TargetWidth:(i+1)*copyOp.TargetWidth],
+				copyOp.Source[i*copyOp.SourceWidth:(i+1)*copyOp.SourceWidth],
+			)
+		}
+	}
+
+}

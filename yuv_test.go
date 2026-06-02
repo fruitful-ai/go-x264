@@ -194,6 +194,66 @@ func TestImageToYUV_LargerImage(t *testing.T) {
 	}
 }
 
+func TestCropEvenI420(t *testing.T) {
+	tests := []struct {
+		name   string
+		w, h   int
+	}{
+		{"even 4x4", 4, 4},
+		{"odd width 5x4", 5, 4},
+		{"odd height 4x5", 4, 5},
+		{"both odd 5x5", 5, 5},
+		{"odd width 3x4", 3, 4},
+		{"odd height 4x3", 4, 3},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tw, th := tt.w & ^1, tt.h & ^1
+
+			ySrc := tt.w * tt.h
+			uvSrc := (tt.w / 2) * (tt.h / 2)
+			src := make([]byte, ySrc+uvSrc*2)
+
+			for i := range ySrc {
+				src[i] = 0x11
+			}
+			for i := ySrc; i < ySrc+uvSrc; i++ {
+				src[i] = 0x33
+			}
+			for i := ySrc + uvSrc; i < len(src); i++ {
+				src[i] = 0x55
+			}
+
+			yDst := tw * th
+			uvDst := (tw / 2) * (th / 2)
+			dst := make([]byte, yDst+uvDst*2)
+
+			CropEvenI420(src, tt.w, tt.h, dst)
+
+			for i := range yDst {
+				if dst[i] != 0x11 {
+					t.Errorf("Y[%d] = 0x%02x, want 0x11", i, dst[i])
+				}
+			}
+			for i := yDst; i < yDst+uvDst; i++ {
+				if dst[i] != 0x33 {
+					t.Errorf("U[%d] = 0x%02x, want 0x33", i-yDst, dst[i])
+				}
+			}
+			for i := yDst + uvDst; i < len(dst); i++ {
+				if dst[i] != 0x55 {
+					t.Errorf("V[%d] = 0x%02x, want 0x55", i-yDst-uvDst, dst[i])
+				}
+			}
+		})
+	}
+}
+
+func TestCropEvenI420_ZeroOutput(t *testing.T) {
+	// 1x1 crops to 0x0: no output pixels, should not panic.
+	CropEvenI420([]byte{42}, 1, 1, nil)
+}
+
 func TestImageToYUV_WithEncoder(t *testing.T) {
 	img := image.NewRGBA(image.Rect(0, 0, 64, 64))
 	for y := 0; y < 64; y++ {
